@@ -2,7 +2,7 @@
 
 > Bulk URL submission tool that automatically notifies **Google Indexing API** and **IndexNow** with intelligent multi-key rotation, quota tracking, retry logic, and a real-time Next.js dashboard.
 
-Built on [Motia.dev](https://motia.dev) — an event-driven TypeScript framework powered by the iii runtime.
+An event-driven TypeScript framework powered by the iii runtime.
 
 ---
 
