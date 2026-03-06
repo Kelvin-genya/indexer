@@ -1,20 +1,31 @@
 {
   "name": "indexer",
   "version": "1.0.0",
+  "type": "module",
   "description": "URL Indexer Backend - Submit bulk URLs to Google Indexing API and IndexNow",
   "scripts": {
     "dev": "iii -c iii-config.yaml",
     "test": "echo \"No tests yet\" && exit 0"
   },
-  "keywords": ["motia", "indexing", "google", "indexnow"],
+  "keywords": [
+    "motia",
+    "indexing",
+    "google",
+    "indexnow"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@motiadev/core": "^0.17.14-beta.196",
+    "@motiadev/plugin-endpoint": "^0.17.14-beta.196",
+    "@motiadev/plugin-logs": "^0.17.14-beta.196",
+    "@motiadev/plugin-observability": "^0.17.14-beta.196",
+    "@motiadev/plugin-states": "^0.17.14-beta.196",
     "googleapis": "^144.0.0",
-    "motia": "^1.0.0-rc.26"
+    "motia": "^0.2.2-next.20260228025334"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
   }
 }

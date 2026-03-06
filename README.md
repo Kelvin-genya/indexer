@@ -175,8 +175,8 @@ The file content should be just the key string (no newlines, no formatting).
 ```bash
 iii -c iii-config.yaml
 ```
-- API available at `http://localhost:3000`
-- Motia Workbench UI at `http://localhost:3000` (visual event flow debugger)
+- API available at `http://localhost:3111`
+- Motia Workbench UI at `http://localhost:3111` (visual event flow debugger)
 
 **Frontend** (in a separate terminal):
 ```bash
@@ -195,7 +195,7 @@ Submit an array of URLs for indexing.
 
 **Request:**
 ```bash
-curl -X POST http://localhost:3000/api/submit-urls \
+curl -X POST http://localhost:3111/api/submit-urls \
   -H "Content-Type: application/json" \
   -d '{
     "urls": [
@@ -224,7 +224,7 @@ Get current quota usage and pending queue depth.
 
 **Request:**
 ```bash
-curl http://localhost:3000/api/status
+curl http://localhost:3111/api/status
 ```
 
 **Response:**
@@ -260,7 +260,7 @@ Get paginated submission history with optional filtering.
 
 **Request:**
 ```bash
-curl "http://localhost:3000/api/history?limit=10&offset=0&status=success"
+curl "http://localhost:3111/api/history?limit=10&offset=0&status=success"
 ```
 
 **Response:**
@@ -383,7 +383,7 @@ indexer/
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:3000` | Motia backend URL |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3111` | Motia backend URL |
 
 ---
 
