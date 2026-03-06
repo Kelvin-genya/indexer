@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react'
 import ApiKeyQuotaTable from '@/components/api-key-quota-table'
 import { getStatus, type StatusResult } from '@/lib/api-client'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
 export default function DashboardPage() {
   const [data, setData] = useState<StatusResult | null>(null)
@@ -28,43 +31,89 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">API Key Dashboard</h1>
-        <button
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Monitor API key quotas and pending queue.</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => { setLoading(true); fetchStatus() }}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700
-                     hover:bg-gray-50 transition-colors"
         >
           Refresh
-        </button>
+        </Button>
       </div>
 
-      {loading && !data && (
-        <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
-          Loading...
+      {/* Summary cards */}
+      {data && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Total Used</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">{data.totalUsed.toLocaleString()}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">
+                of {data.totalCapacity.toLocaleString()} daily capacity
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>API Keys</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">{data.keys.length}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">
+                {data.keys.filter((k) => k.dailyUsed < k.dailyLimit).length} with remaining quota
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Pending Queue</CardDescription>
+              <CardTitle className="text-3xl tabular-nums">
+                {data.pendingQueueSize}
+                {data.pendingQueueSize > 0 && (
+                  <Badge variant="destructive" className="ml-2 text-xs align-middle">
+                    overflow
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">URLs waiting for quota reset</p>
+            </CardContent>
+          </Card>
         </div>
       )}
 
+      {loading && !data && (
+        <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">Loading...</div>
+      )}
+
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-800 mb-4">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </div>
       )}
 
       {data && (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <ApiKeyQuotaTable
-            keys={data.keys}
-            pendingQueueSize={data.pendingQueueSize}
-            totalUsed={data.totalUsed}
-            totalCapacity={data.totalCapacity}
-          />
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Key Usage Breakdown</CardTitle>
+            <CardDescription>Per-key quota consumption with visual progress.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ApiKeyQuotaTable keys={data.keys} />
+          </CardContent>
+        </Card>
       )}
 
       {data && (
-        <p className="mt-3 text-xs text-gray-400 text-right">Auto-refreshes every 30 seconds</p>
+        <p className="text-xs text-muted-foreground text-right">Auto-refreshes every 30s</p>
       )}
     </div>
   )
