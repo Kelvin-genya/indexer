@@ -2,7 +2,7 @@
 
 ## Overview
 
-URL Indexer is a Motia.dev event-driven system that distributes bulk URL submissions across multiple Google Indexing API keys and IndexNow with intelligent quota management and automatic retry logic.
+URL Indexer is a event-driven system that distributes bulk URL submissions across multiple Google Indexing API keys and IndexNow with intelligent quota management and automatic retry logic.
 
 ## Core Components
 
