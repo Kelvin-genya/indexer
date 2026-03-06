@@ -87,6 +87,7 @@ worktrees/
 
 # Motia
 .motia/
+data/
 
 # Credentials (service account JSONs)
 credentials/*.json
