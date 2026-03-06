@@ -1,5 +1,17 @@
 # URL Indexer
 
+<p align="center">
+  <a href="https://seoengine.ai/?ref=url-indexer">
+    <img src="https://img.lightshot.app/vlRu5KRPTXq2f0QPxeXO2A.png" alt="SEO Engine - AI-Powered SEO Platform" width="100%" />
+  </a>
+</p>
+
+<p align="center">
+  <strong>Built by <a href="https://seoengine.ai/?ref=url-indexer">SEO Engine</a></strong> — The AI-powered platform that helps you rank higher, drive more traffic, and convert visitors into customers. <a href="https://seoengine.ai/?ref=url-indexer">Try it free →</a>
+</p>
+
+---
+
 > Bulk URL submission tool that automatically notifies **Google Indexing API** and **IndexNow** with intelligent multi-key rotation, quota tracking, retry logic, and a real-time Next.js dashboard.
 
 An event-driven TypeScript framework powered by the iii runtime.
@@ -315,11 +327,13 @@ With 10 GCP projects, you get **2,000 URL submissions per day** to Google's Inde
 
 ```
 indexer/
-├── src/                              # Motia backend (auto-discovered .step.ts files)
+├── steps/                            # Motia backend (auto-discovered .step.ts files)
 │   ├── config/
 │   │   ├── types.ts                  # Shared TypeScript interfaces
-│   │   ├── motia-step-types.ts       # Local type helpers for Motia RC
-│   │   └── google-auth-manager.ts    # Multi-key auth rotation utility
+│   │   ├── constants.ts              # Shared topic names, state groups, limits
+│   │   ├── http-helpers.ts           # CORS, request body/query helpers
+│   │   ├── submission-helpers.ts     # State merge helper for submissions
+│   │   └── google-auth-manager.ts    # Multi-key auth rotation with caching
 │   ├── submit-urls.step.ts           # POST /api/submit-urls
 │   ├── get-status.step.ts            # GET /api/status
 │   ├── get-history.step.ts           # GET /api/history
@@ -437,3 +451,15 @@ Contributions welcome! Please open an issue first to discuss what you'd like to 
 3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
 4. Push to the branch (`git push origin feat/amazing-feature`)
 5. Open a Pull Request
+
+---
+
+<p align="center">
+  <a href="https://seoengine.ai/?ref=url-indexer">
+    <img src="https://img.lightshot.app/vlRu5KRPTXq2f0QPxeXO2A.png" alt="SEO Engine - AI-Powered SEO Platform" width="100%" />
+  </a>
+</p>
+
+<p align="center">
+  <strong>Built by <a href="https://seoengine.ai/?ref=url-indexer">SEO Engine</a></strong> — The AI-powered platform that helps you rank higher, drive more traffic, and convert visitors into customers. <a href="https://seoengine.ai/?ref=url-indexer">Try it free →</a>
+</p>
