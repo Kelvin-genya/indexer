@@ -1,0 +1,20 @@
+{
+  "name": "indexer",
+  "version": "1.0.0",
+  "description": "URL Indexer Backend - Submit bulk URLs to Google Indexing API and IndexNow",
+  "scripts": {
+    "dev": "iii -c iii-config.yaml",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": ["motia", "indexing", "google", "indexnow"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "googleapis": "^144.0.0",
+    "motia": "^1.0.0-rc.26"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  }
+}
