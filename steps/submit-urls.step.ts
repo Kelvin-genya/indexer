@@ -1,27 +1,19 @@
 import type { Handlers, StepConfig } from 'motia'
+import { TOPIC_URL_SUBMITTED } from './config/constants'
+import { getBody, jsonResponse } from './config/http-helpers'
 
 export const config = {
   name: 'SubmitUrls',
-  triggers: [
-    {
-      type: 'http',
-      method: 'POST',
-      path: '/api/submit-urls',
-    },
-  ],
-  enqueues: ['url.submitted'],
+  triggers: [{ type: 'http', method: 'POST', path: '/api/submit-urls' }],
+  enqueues: [TOPIC_URL_SUBMITTED],
   flows: ['url-indexing'],
 } as const satisfies StepConfig
 
 export const handler: Handlers<typeof config> = async (request, { enqueue, logger }) => {
-  const { urls } = ((request as any).request?.body ?? (request as any).body ?? {}) as { urls: string[] }
+  const { urls } = getBody<{ urls: string[] }>(request)
 
   if (!urls || !Array.isArray(urls)) {
-    return {
-      status: 400,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: { error: 'urls array is required' },
-    }
+    return jsonResponse(400, { error: 'urls array is required' })
   }
 
   const validUrls: string[] = []
@@ -36,22 +28,11 @@ export const handler: Handlers<typeof config> = async (request, { enqueue, logge
   }
 
   if (validUrls.length === 0) {
-    return {
-      status: 400,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: { error: 'No valid URLs provided' },
-    }
+    return jsonResponse(400, { error: 'No valid URLs provided' })
   }
 
-  for (const url of validUrls) {
-    await enqueue({ topic: 'url.submitted', data: { url } })
-  }
+  await Promise.all(validUrls.map((url) => enqueue({ topic: TOPIC_URL_SUBMITTED, data: { url } })))
 
   logger.info(`Submitted ${validUrls.length} URLs, rejected ${invalidUrls.length}`)
-
-  return {
-    status: 200,
-    headers: { 'Access-Control-Allow-Origin': '*' },
-    body: { accepted: validUrls.length, rejected: invalidUrls.length },
-  }
+  return jsonResponse(200, { accepted: validUrls.length, rejected: invalidUrls.length })
 }
