@@ -1,20 +1,18 @@
 import type { Handlers, StepConfig } from 'motia'
+import { updateSubmission } from './config/submission-helpers'
+import { TOPIC_INDEXNOW_INDEX, TOPIC_SUBMISSION_RETRY, TOPIC_SUBMISSION_COMPLETE } from './config/constants'
+import { MAX_RETRY_COUNT } from './config/constants'
 
 export const config = {
   name: 'IndexNowSubmitter',
   description: 'Submits URL to IndexNow API (Bing, Yandex, DuckDuckGo)',
-  triggers: [
-    {
-      type: 'queue',
-      topic: 'indexnow.index',
-    },
-  ],
-  enqueues: ['submission.retry', 'submission.complete'],
+  triggers: [{ type: 'queue', topic: TOPIC_INDEXNOW_INDEX }],
+  enqueues: [TOPIC_SUBMISSION_RETRY, TOPIC_SUBMISSION_COMPLETE],
   flows: ['url-indexing'],
 } as const satisfies StepConfig
 
 export const handler: Handlers<typeof config> = async (input, { state, enqueue, logger }) => {
-  const { url, retryCount } = input as { url: string; retryCount?: number }
+  const { url, retryCount = 0 } = input as { url: string; retryCount?: number }
 
   const key = process.env.INDEXNOW_KEY
   const host = process.env.INDEXNOW_HOST
@@ -22,8 +20,7 @@ export const handler: Handlers<typeof config> = async (input, { state, enqueue, 
 
   if (!key || !host || !keyLocation) {
     logger.error('Missing IndexNow env vars: INDEXNOW_KEY, INDEXNOW_HOST, INDEXNOW_KEY_LOCATION')
-    const existing = await state.get<any>('submissions', url)
-    await state.set('submissions', url, { ...existing, indexNowStatus: 'failed' })
+    await updateSubmission(state, url, { indexNowStatus: 'failed' })
     return
   }
 
@@ -35,32 +32,19 @@ export const handler: Handlers<typeof config> = async (input, { state, enqueue, 
     })
 
     if (response.status === 200 || response.status === 202) {
-      const existing = await state.get<any>('submissions', url)
-      await state.set('submissions', url, { ...existing, indexNowStatus: 'success' })
-      await enqueue({ topic: 'submission.complete', data: { url, service: 'indexnow' } })
+      await updateSubmission(state, url, { indexNowStatus: 'success' })
+      await enqueue({ topic: TOPIC_SUBMISSION_COMPLETE, data: { url, service: 'indexnow' } })
       logger.info(`IndexNow success for ${url}`)
     } else if (response.status === 429) {
       logger.warn(`IndexNow rate limited for ${url}, scheduling retry`)
-      await enqueue({
-        topic: 'submission.retry',
-        data: { url, service: 'indexnow', retryCount: (retryCount ?? 0) + 1 },
-      })
+      await enqueue({ topic: TOPIC_SUBMISSION_RETRY, data: { url, service: 'indexnow', retryCount: retryCount + 1 } })
     } else {
       logger.error(`IndexNow error ${response.status} for ${url}`)
-      const existing = await state.get<any>('submissions', url)
-      await state.set('submissions', url, { ...existing, indexNowStatus: 'failed' })
+      await updateSubmission(state, url, { indexNowStatus: 'failed' })
     }
   } catch (err) {
     logger.error(`IndexNow network error for ${url}: ${String(err)}`)
-    const nextRetry = (retryCount ?? 0) + 1
-    if (nextRetry <= 3) {
-      await enqueue({
-        topic: 'submission.retry',
-        data: { url, service: 'indexnow', retryCount: nextRetry },
-      })
-    } else {
-      const existing = await state.get<any>('submissions', url)
-      await state.set('submissions', url, { ...existing, indexNowStatus: 'failed' })
-    }
+    // Delegate retry decision to retry-handler instead of duplicating logic here
+    await enqueue({ topic: TOPIC_SUBMISSION_RETRY, data: { url, service: 'indexnow', retryCount: retryCount + 1 } })
   }
 }

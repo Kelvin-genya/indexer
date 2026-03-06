@@ -1,35 +1,26 @@
 import { google } from 'googleapis'
 import { getNextAvailableKey, incrementUsage } from './config/google-auth-manager'
+import { updateSubmission } from './config/submission-helpers'
+import { TOPIC_GOOGLE_INDEX, TOPIC_SUBMISSION_RETRY, TOPIC_SUBMISSION_COMPLETE, STATE_PENDING_QUEUE } from './config/constants'
 import type { Handlers, StepConfig } from 'motia'
 
 export const config = {
   name: 'GoogleIndexer',
   description: 'Submits URL to Google Indexing API with key rotation',
-  triggers: [
-    {
-      type: 'queue',
-      topic: 'google.index',
-    },
-  ],
-  enqueues: ['submission.retry', 'submission.complete'],
+  triggers: [{ type: 'queue', topic: TOPIC_GOOGLE_INDEX }],
+  enqueues: [TOPIC_SUBMISSION_RETRY, TOPIC_SUBMISSION_COMPLETE],
   flows: ['url-indexing'],
 } as const satisfies StepConfig
 
 export const handler: Handlers<typeof config> = async (input, { state, enqueue, logger }) => {
-  const { url, retryCount } = input as { url: string; retryCount?: number }
+  const { url, retryCount = 0 } = input as { url: string; retryCount?: number }
 
   const keyResult = await getNextAvailableKey(state)
 
   if (!keyResult) {
     logger.warn(`All Google API keys exhausted, queuing URL: ${url}`)
-    await state.set('pending-queue', url, { url, timestamp: new Date().toISOString() })
-    const existing = await state.get<any>('submissions', url)
-    await state.set('submissions', url, {
-      ...existing,
-      url,
-      googleStatus: 'queued',
-      timestamp: new Date().toISOString(),
-    })
+    await state.set(STATE_PENDING_QUEUE, url, { url, timestamp: new Date().toISOString() })
+    await updateSubmission(state, url, { googleStatus: 'queued' })
     return
   }
 
@@ -42,36 +33,19 @@ export const handler: Handlers<typeof config> = async (input, { state, enqueue, 
     })
 
     await incrementUsage(state, keyId)
-    const existing = await state.get<any>('submissions', url)
-    await state.set('submissions', url, {
-      ...existing,
-      url,
-      googleStatus: 'success',
-      keyUsed: keyId,
-      timestamp: new Date().toISOString(),
-      retryCount: retryCount ?? 0,
-    })
+    await updateSubmission(state, url, { googleStatus: 'success', keyUsed: keyId, retryCount })
 
     logger.info(`Google indexing success for URL: ${url}, key: ${keyId}`)
-    await enqueue({ topic: 'submission.complete', data: { url, service: 'google', keyUsed: keyId } })
+    await enqueue({ topic: TOPIC_SUBMISSION_COMPLETE, data: { url, service: 'google', keyUsed: keyId } })
   } catch (err: any) {
-    const status: number = err?.response?.status ?? err?.code ?? 0
+    const httpStatus: number = typeof err?.response?.status === 'number' ? err.response.status : 0
 
-    if (status === 429 || status >= 500) {
-      const nextRetryCount = (retryCount ?? 0) + 1
-      logger.warn(`Google transient error (${status}) for ${url}, retry #${nextRetryCount}`)
-      await enqueue({ topic: 'submission.retry', data: { url, service: 'google', retryCount: nextRetryCount } })
+    if (httpStatus === 429 || httpStatus >= 500) {
+      logger.warn(`Google transient error (${httpStatus}) for ${url}, retry #${retryCount + 1}`)
+      await enqueue({ topic: TOPIC_SUBMISSION_RETRY, data: { url, service: 'google', retryCount: retryCount + 1 } })
     } else {
-      logger.error(`Google permanent error (${status}) for ${url} — ${err?.message}`)
-      const existingFail = await state.get<any>('submissions', url)
-      await state.set('submissions', url, {
-        ...existingFail,
-        url,
-        googleStatus: 'failed',
-        keyUsed: keyId,
-        timestamp: new Date().toISOString(),
-        retryCount: retryCount ?? 0,
-      })
+      logger.error(`Google permanent error (${httpStatus}) for ${url} — ${err?.message}`)
+      await updateSubmission(state, url, { googleStatus: 'failed', keyUsed: keyId, retryCount })
     }
   }
 }
